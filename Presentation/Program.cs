@@ -1,24 +1,25 @@
-﻿using Core.Helpers;
-using System.Threading.Tasks.Dataflow;
-using Core.Constants;
-using System.Globalization;
-using Core.Entities;
+﻿using Core.Constants;
+using Core.Helpers;
 using Data.Repositories.Concrete;
+using Presentation.Services;
 
 namespace Presentation
 {
-    public  static class Program
+    public static class Program
     {
-        private static int maxSize;
-        public  readonly static GroupRepository _groupRepository;
+        private readonly static GroupService _groupService;
         static Program()
         {
-             _groupRepository = new GroupRepository();
+            _groupService = new GroupService();
         }
-    
+
+        private static int maxSize;
+        public readonly static GroupRepository _groupRepository;
+
+
         static void Main()
         {
-          
+
             ConsoleHelper.WriteWithColor("---Welcome---", ConsoleColor.Cyan);
 
             while (true)
@@ -29,7 +30,7 @@ namespace Presentation
                 ConsoleHelper.WriteWithColor("4-Get All Groups", ConsoleColor.Yellow);
                 ConsoleHelper.WriteWithColor("5-Get Group By Id", ConsoleColor.Yellow);
                 ConsoleHelper.WriteWithColor("6-Get Group By Name", ConsoleColor.Yellow);
-                ConsoleHelper.WriteWithColor("0-Exit",ConsoleColor.Yellow);
+                ConsoleHelper.WriteWithColor("0-Exit", ConsoleColor.Yellow);
 
                 ConsoleHelper.WriteWithColor("---Select Option---", ConsoleColor.Cyan);
 
@@ -42,133 +43,35 @@ namespace Presentation
                 }
                 else
                 {
-                    if (!(number>=0 && number<=6))
+                    if (!(number >= 0 && number <= 6))
                     {
                         ConsoleHelper.WriteWithColor("Inputed number is not exist!", ConsoleColor.Red);
                     }
                     else
                     {
-                        switch(number)
+                        switch (number)
                         {
-                                case (int)GroupOptions.CreatedGroup:
-                                ConsoleHelper.WriteWithColor("---Enter name---", ConsoleColor.Cyan);
-                                    string name= Console.ReadLine();
-                                int maxSize;
-
-
-                                MaxSizeDescription: ConsoleHelper.WriteWithColor("---Enter group max size---", ConsoleColor.Cyan);
-                                isSucceeded= int.TryParse(Console.ReadLine(), out maxSize);
-                                if (!isSucceeded)
-                                {
-                                    ConsoleHelper.WriteWithColor("max size is not correct format!",ConsoleColor.Red);
-                                    goto MaxSizeDescription;
-                                }
-                                if (maxSize>18)
-                                {
-                                    ConsoleHelper.WriteWithColor("Max size should be less than or equals to 18", ConsoleColor.Red);
-                                    goto MaxSizeDescription;
-
-                                }
-
-                                StartDateDescription: ConsoleHelper.WriteWithColor("---Enter start date---", ConsoleColor.Cyan);
-                                DateTime startDate;
-                                isSucceeded=DateTime.TryParseExact(Console.ReadLine(), "dd.MM.yyyy",CultureInfo.InvariantCulture,DateTimeStyles.None, out startDate);
-                                if (!isSucceeded)
-                                {
-                                    ConsoleHelper.WriteWithColor("Start date is not correct format!", ConsoleColor.Red);
-                                    goto StartDateDescription;
-                                }
-
-                                DateTime boundaryDate = new DateTime(2015, 1, 1);
-                                if (startDate < boundaryDate) 
-                                {
-                                    ConsoleHelper.WriteWithColor("Start date is not chosen right", ConsoleColor.Red);
-                                    goto StartDateDescription;
-
-                                }
-
-                                EndDateDescription: ConsoleHelper.WriteWithColor("---Enter end date---", ConsoleColor.Cyan);
-                                DateTime endDate;
-                                isSucceeded = DateTime.TryParseExact(Console.ReadLine(), "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out endDate);
-                                if (!isSucceeded)
-                                {
-                                    ConsoleHelper.WriteWithColor("Start date is not correct format!", ConsoleColor.Red);
-                                    goto StartDateDescription;
-                                }
-                                if (startDate>endDate)
-                                {
-                                    ConsoleHelper.WriteWithColor("End date must be bigger than start date", ConsoleColor.Red);
-                                    goto EndDateDescription;
-                                }
-
-                                var group = new Group
-                                {
-                                    Name = name,
-                                    MaxSize = maxSize,
-                                    StartDate= startDate,
-                                    EndDate= endDate
-                                };
-
-                                _groupRepository.Add(group);
-                                ConsoleHelper.WriteWithColor($"Group successfully created with Name:{group.Name},Max Size:{group.MaxSize},Start date:{group.StartDate.ToShortTimeString()},End date:{group.EndDate.ToShortTimeString()}");
-
-
+                            case (int)GroupOptions.CreatedGroup:
+                                _groupService.Create();
                                 break;
-                                case(int)GroupOptions.UpdateGroup:
+                            case (int)GroupOptions.UpdateGroup:
+                                _groupService.Update();
                                 break;
-                                case(int)GroupOptions.DeleteGroup:
-                                var groupss = _groupRepository.GetAll();
-
-                                ConsoleHelper.WriteWithColor("---All groups---", ConsoleColor.Cyan);
-                                foreach (var group_ in groupss)
-                                {
-                                    ConsoleHelper.WriteWithColor($"id:{group_.Id},Name:{group_.Name}, Max size:{ group_.MaxSize},Start date:{ group_.StartDate}");
-                                }
-
-                            IdDescription: ConsoleHelper.WriteWithColor("---Enter Id---", ConsoleColor.Cyan);
-
-
-                                int id;
-                                isSucceeded=int.TryParse(Console.ReadLine(), out id);
-                                if (!isSucceeded)
-                                {
-                                    ConsoleHelper.WriteWithColor("Id is not correct format!", ConsoleColor.Red);
-                                    goto IdDescription;
-                                }
-                                 
-                                var dbGroup= _groupRepository.Get(id);
-                                if (dbGroup is null)
-                                {
-                                    ConsoleHelper.WriteWithColor("There is no any group in this id",ConsoleColor.Red);
-                                }
-                                else
-                                {
-                                    _groupRepository.Delete(dbGroup);
-                                    ConsoleHelper.WriteWithColor("Group successfully deleted",ConsoleColor.Green) ;
-                                }
-
-
-
-
+                            case (int)GroupOptions.DeleteGroup:
+                                _groupService.Delete();
                                 break;
-                                case(int)GroupOptions.GetAllGroups:
-                                var groups = _groupRepository.GetAll();
-
-                                ConsoleHelper.WriteWithColor("---All groups---",ConsoleColor.Cyan);
-                                foreach(var group_ in groups)
-                                {
-                                    ConsoleHelper.WriteWithColor($"id:{group_.Id},Name:{group_.Name},Max size:{group_.MaxSize},Start date:{group_.StartDate}");
-                                }
+                            case (int)GroupOptions.GetAllGroups:
+                                _groupService.GetAll();
                                 break;
-
-
-                                case(int)GroupOptions.GetGroupById:
+                            case (int)GroupOptions.GetGroupById:
+                                _groupService.GetGroupById();
                                 break;
-                                case(int)GroupOptions.GetGroupByName:   
+                            case (int)GroupOptions.GetGroupByName:
+                                _groupService.GetGroupByName();
                                 break;
-                                case (int)GroupOptions.Exit:
-                                return;
-                              
+                            case (int)GroupOptions.Exit:
+                                _groupService.Exit();
+                                break;
                             default:
                                 break;
 
@@ -182,9 +85,9 @@ namespace Presentation
 
             }
 
-           
 
-            
+
+
         }
     }
 }

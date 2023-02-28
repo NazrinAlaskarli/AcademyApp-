@@ -1,11 +1,6 @@
 ﻿using Core.Entities;
 using Data.Contexts;
 using Data.Repositories.Abstract;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Data.Repositories.Concrete
 {
@@ -32,8 +27,8 @@ namespace Data.Repositories.Concrete
         {
             id++;
             group.Id = id;
-            group.CreatedAt= DateTime.Now;
-            DbContext.Groups.Add(group);    
+            group.CreatedAt = DateTime.Now;
+            DbContext.Groups.Add(group);
         }
 
         public void Delete(Group group)
@@ -48,13 +43,13 @@ namespace Data.Repositories.Concrete
             if (dbGroup is not null)
             {
                 dbGroup.Name = group.Name;
-                dbGroup.MaxSize= group.MaxSize;
-                dbGroup.StartDate= group.StartDate;
-                dbGroup.EndDate= group.EndDate;
-                dbGroup.ModifiedAt= DateTime.Now;
+                dbGroup.MaxSize = group.MaxSize;
+                dbGroup.StartDate = group.StartDate;
+                dbGroup.EndDate = group.EndDate;
+                dbGroup.ModifiedAt = DateTime.Now;
             }
         }
 
-      
+
     }
 }
